@@ -21,7 +21,6 @@
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="https://i.ibb.co/Z650JJc0/Messenger-creation-4-FE81-C6-B-2823-43-B6-A137-5-BF82-ABFC88-B.jpg">
 
-    <!-- ⚡ FAST CACHE SYSTEM -->
     <script>
         window.FAST_CACHE = {
             products: 'thc_fast_products_v1', orders: 'thc_fast_orders_v1',
@@ -42,7 +41,6 @@
         console.log('⚡ Fast cache ready');
     </script>
 
-    <!-- ⚡ ULTRA FAST INSTANT ACTION SYSTEM -->
     <script>
         window.instantAction = function(uiAction, firebaseAction, successMsg) {
             try { if (typeof uiAction === 'function') uiAction(); } catch(e) { console.warn('UI action error:', e); }
@@ -77,7 +75,6 @@
         console.log('⚡ Ultra Fast Instant Action loaded');
     </script>
 
-    <!-- 🔔 NOTIFICATION SYSTEM -->
     <script>
         (function() {
             if (document.getElementById('admin-notification-container')) return;
@@ -157,10 +154,8 @@
         if ('Notification' in window && Notification.permission === 'default') {
             setTimeout(() => Notification.requestPermission(), 3000);
         }
-        console.log('🔔 Notification system ready');
     </script>
 
-    <!-- 🆕 IMGBB UPLOAD SYSTEM -->
     <script>
         window.IMGBB_API_KEY = 'eb9005b90193cd312248ce197c18b25e';
 
@@ -202,23 +197,23 @@
             return data.data.url;
         };
 
-        // Universal upload handler
         window.handleImageUpload = async function(event, targetInputId, previewId, statusId) {
             const file = event.target.files[0];
             if (!file) return;
             const status = statusId ? document.getElementById(statusId) : null;
             const input = document.getElementById(targetInputId);
             try {
-                if (status) { status.className = 'upload-status warn'; status.textContent = '⏳ Compressing...'; }
+                if (status) { status.className = 'upload-status warn'; status.textContent = '⏳ Uploading...'; }
                 const url = await window.uploadToImgBB(file);
                 if (input) input.value = url;
                 if (status) { status.className = 'upload-status ok'; status.textContent = '✅ Uploaded!'; }
                 if (previewId) {
                     const preview = document.getElementById(previewId);
-                    if (preview) preview.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`;
+                    if (preview) {
+                        preview.innerHTML = `<img src="${url}"><button type="button" class="img-remove-btn" onclick="clearImageUpload('${targetInputId}', '${previewId}')"><i class="fas fa-times"></i></button>`;
+                        preview.classList.add('has-image');
+                    }
                 }
-                if (window.showToast) window.showToast('✅ Image uploaded!');
-                else alert('✅ Uploaded!');
             } catch(err) {
                 if (status) { status.className = 'upload-status bad'; status.textContent = '❌ ' + err.message; }
                 alert('❌ ' + err.message);
@@ -226,7 +221,15 @@
             event.target.value = '';
         };
 
-        console.log('✅ ImgBB upload system ready');
+        window.clearImageUpload = function(hiddenInputId, previewId) {
+            const input = document.getElementById(hiddenInputId);
+            if (input) input.value = '';
+            const preview = document.getElementById(previewId);
+            if (preview) { 
+                preview.innerHTML = '<div class="img-placeholder"><i class="fas fa-image"></i><span>No image</span></div>'; 
+                preview.classList.remove('has-image'); 
+            }
+        };
     </script>
 
     <style>
@@ -320,19 +323,31 @@
         .upload-status.bad { color: var(--bad); }
         .upload-status.warn { color: var(--warn); }
 
-        .crow { display: grid; grid-template-columns: 1.5fr 2fr auto auto; gap: 8px; margin-bottom: 8px; align-items: center; }
-        .crow input { padding: 10px 12px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; font-family: inherit; width: 100%; }
-        .crow input:focus { border-color: var(--gold); }
-        .crow .rm { background: transparent; border: 1px solid var(--bad); color: var(--bad); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-        .crow .rm:hover { background: var(--bad); color: #fff; }
-        .crow .mini-upl { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; border: none; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+        .img-preview-box { position: relative; border: 2px dashed var(--border); border-radius: 12px; background: var(--bg); overflow: hidden; transition: all .2s; display: flex; align-items: center; justify-content: center; }
+        .img-preview-box.has-image { border-style: solid; border-color: var(--gold); }
+        .img-preview-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .img-preview-box .img-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--muted); text-align: center; padding: 15px; }
+        .img-preview-box .img-placeholder i { font-size: 32px; color: var(--gold); opacity: .4; }
+        .img-preview-box .img-placeholder span { font-size: 11px; }
+        .img-preview-box .img-remove-btn { position: absolute; top: 6px; right: 6px; background: rgba(239,68,68,.9); color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.5); transition: all .2s; }
+        .img-preview-box .img-remove-btn:hover { background: var(--bad); transform: scale(1.1); }
 
-        .crow-img { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; margin-bottom: 8px; align-items: center; }
-        .crow-img input { padding: 10px 12px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; font-family: inherit; width: 100%; }
-        .crow-img input:focus { border-color: var(--gold); }
-        .crow-img .rm { background: transparent; border: 1px solid var(--bad); color: var(--bad); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-        .crow-img .rm:hover { background: var(--bad); color: #fff; }
-        .crow-img .mini-upl { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; border: none; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+        .preview-main { width: 100%; max-width: 140px; aspect-ratio: 1; margin: 0 auto 10px; }
+        .preview-add { width: 80px; height: 80px; flex-shrink: 0; }
+        .preview-color { width: 60px; height: 60px; flex-shrink: 0; }
+        .preview-banner { width: 100%; max-width: 300px; aspect-ratio: 16/9; margin: 0 auto; }
+
+        .crow-color{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start;padding:10px;background:var(--card);border-radius:10px;border:1px solid var(--border)}
+        .crow-color .color-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+        .crow-color .color-info input{padding:10px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none;font-family:inherit;width:100%}
+        .crow-color .color-info input:focus{border-color:var(--gold)}
+        .crow-color .rm{background:transparent;border:1px solid var(--bad);color:var(--bad);width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;align-self:center}
+        .crow-color .rm:hover{background:var(--bad);color:#fff}
+
+        .crow-img{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start;padding:10px;background:var(--card);border-radius:10px;border:1px solid var(--border)}
+        .crow-img .img-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;justify-content:center}
+        .crow-img .rm{background:transparent;border:1px solid var(--bad);color:var(--bad);width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;align-self:center}
+        .crow-img .rm:hover{background:var(--bad);color:#fff}
 
         .size-box { display: flex; flex-wrap: wrap; gap: 10px; padding: 5px 0; align-items: center; }
         .size-btn { background: var(--bg); border: 1.5px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: inherit; transition: all .2s ease; }
@@ -490,12 +505,17 @@
             .weekly-bar-label { font-size: 9px; }
             .size-row-item { grid-template-columns: 1fr 1fr; }
             .size-chart-header-row { display: none; }
+            .preview-main { max-width: 120px; }
+            .preview-add { width: 100%; max-width: 120px; }
+            .preview-color { width: 100%; max-width: 80px; }
+            .crow-img, .crow-color { flex-direction: column; }
+            .crow-img .img-preview-box, .crow-color .img-preview-box { width: 100% !important; max-width: 200px !important; margin: 0 auto; }
+            .img-info .upload-btn, .color-info .upload-btn { width: 100%; justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN SCREEN -->
     <div id="login-screen">
         <div class="login-box">
             <div class="login-logo"><img src="https://i.ibb.co/Z650JJc0/Messenger-creation-4-FE81-C6-B-2823-43-B6-A137-5-BF82-ABFC88-B.jpg" alt="Logo"></div>
@@ -518,7 +538,6 @@
         </div>
     </div>
 
-    <!-- ADMIN PANEL -->
     <div id="admin">
         <header class="head">
             <div class="head-left">
@@ -532,7 +551,6 @@
         </header>
 
         <div class="wrap">
-            <!-- TABS -->
             <div class="tabs">
                 <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</button>
                 <button class="tab" data-tab="products" onclick="switchTab('products')"><i class="fas fa-box"></i> Products</button>
@@ -547,7 +565,6 @@
                 <button class="tab" data-tab="settings" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</button>
             </div>
 
-            <!-- DASHBOARD -->
             <div class="section active" id="sec-dashboard">
                 <div class="stats">
                     <div class="stat"><i class="fas fa-box"></i><div class="val" id="st-products">0</div><div class="lbl">Products</div></div>
@@ -591,7 +608,6 @@
                 </div>
             </div>
 
-            <!-- PRODUCTS -->
             <div class="section" id="sec-products">
                 <div class="shead">
                     <h2><i class="fas fa-box"></i> All Products</h2>
@@ -600,7 +616,6 @@
                 <div id="products-container"><div class="loading"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
             </div>
 
-            <!-- ADD/EDIT PRODUCT -->
             <div class="section" id="sec-add">
                 <div class="shead">
                     <h2 id="form-title"><i class="fas fa-plus-circle"></i> Add New Product</h2>
@@ -639,32 +654,27 @@
                         <small style="color: var(--muted); font-size: 11px; display: block; margin-top: 5px;">০ দিলে ওয়েবসাইটে "Out of Stock" দেখাবে</small>
                     </div>
 
-                    <!-- MAIN IMAGE + UPLOAD -->
+                    <!-- Main Image (Preview Box Style) -->
                     <div class="fgroup">
-                        <label>🖼️ Main Image URL *</label>
-                        <input type="text" id="p-image" placeholder="https://i.ibb.co/xxxxx/image.png" required>
-                        <div class="img-upload-wrap">
-                            <input type="file" id="p-main-file" accept="image/*" style="display:none" onchange="handleImageUpload(event, 'p-image', null, 'p-main-status')">
-                            <button type="button" class="upload-btn" onclick="document.getElementById('p-main-file').click()">
-                                <i class="fas fa-cloud-upload-alt"></i> Upload From Gallery
-                            </button>
+                        <label>🖼️ Main Image *</label>
+                        <input type="hidden" id="p-image">
+                        <div class="img-preview-box preview-main" id="p-image-preview" style="margin:0 auto 10px;">
+                            <div class="img-placeholder"><i class="fas fa-image"></i><span>No image</span></div>
+                        </div>
+                        <div class="img-upload-wrap" style="justify-content:center;">
+                            <input type="file" id="p-main-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'p-image', 'p-image-preview', 'p-main-status')">
+                            <button type="button" class="upload-btn" onclick="document.getElementById('p-main-file').click()"><i class="fas fa-cloud-upload-alt"></i> Upload Image</button>
                             <span id="p-main-status" class="upload-status"></span>
                         </div>
-                        <small style="color: var(--muted); font-size: 11px; display: block; margin-top: 5px;">ImgBB Link বা HTML কোড — দুটোই চলবে। অথবা সোজা gallery থেকে upload করুন</small>
                     </div>
 
-                    <!-- ADDITIONAL IMAGES -->
+                    <!-- Additional Images (Preview Box Style) -->
                     <div class="fgroup">
                         <label>🖼️ Additional Images (ঐচ্ছিক)</label>
                         <div id="additional-images"></div>
                         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-                            <button type="button" class="btn-s" onclick="addAdditionalImage()" style="flex:1;min-width:140px;justify-content:center">
-                                <i class="fas fa-plus"></i> Add Row
-                            </button>
                             <input type="file" id="additional-files" accept="image/*" multiple style="display:none" onchange="uploadAdditionalMultiple(event)">
-                            <button type="button" class="upload-btn" onclick="document.getElementById('additional-files').click()" style="flex:1;min-width:140px;justify-content:center">
-                                <i class="fas fa-cloud-upload-alt"></i> Upload Multiple
-                            </button>
+                            <button type="button" class="upload-btn" onclick="document.getElementById('additional-files').click()" style="flex:1;min-width:140px;justify-content:center"><i class="fas fa-cloud-upload-alt"></i> Upload Multiple</button>
                         </div>
                     </div>
 
@@ -686,7 +696,7 @@
                         <div class="size-box" id="size-box"></div>
                     </div>
 
-                    <!-- COLORS WITH UPLOAD -->
+                    <!-- Colors (Preview Box Style) -->
                     <div class="fgroup">
                         <label>🎨 Colors *</label>
                         <div id="colors"></div>
@@ -705,7 +715,6 @@
                 </form>
             </div>
 
-            <!-- ORDERS -->
             <div class="section" id="sec-orders">
                 <div class="shead">
                     <h2><i class="fas fa-shopping-bag"></i> All Orders</h2>
@@ -747,7 +756,6 @@
                 <div id="orders-container"><div class="loading"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
             </div>
 
-            <!-- REVIEWS -->
             <div class="section" id="sec-reviews">
                 <div class="shead">
                     <h2><i class="fas fa-star"></i> Customer Reviews</h2>
@@ -756,7 +764,6 @@
                 <div id="reviews-container"><div class="loading"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
             </div>
 
-            <!-- NEWSLETTER -->
             <div class="section" id="sec-newsletter">
                 <div class="shead">
                     <h2><i class="fas fa-envelope"></i> Newsletter Subscribers</h2>
@@ -783,7 +790,6 @@
                 <div id="newsletter-container"><div class="loading"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
             </div>
 
-            <!-- COUPONS -->
             <div class="section" id="sec-coupons">
                 <div class="shead">
                     <h2><i class="fas fa-ticket-alt"></i> Discount Coupons</h2>
@@ -808,7 +814,6 @@
                 <div id="coupons-container"><div class="loading"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
             </div>
 
-            <!-- BANNERS -->
             <div class="section" id="sec-banners">
                 <div class="shead">
                     <h2><i class="fas fa-images"></i> Promo Banners</h2>
@@ -830,7 +835,6 @@
                 <div id="banners-container"><div class="loading"><i class="fas fa-spinner"></i><p>Loading Banners...</p></div></div>
             </div>
 
-            <!-- PAGES EDITOR -->
             <div class="section" id="sec-pages">
                 <div class="shead">
                     <h2><i class="fas fa-file-alt"></i> Website Pages Editor</h2>
@@ -868,7 +872,6 @@
                 </div>
             </div>
 
-            <!-- CONTENT MANAGER -->
             <div class="section" id="sec-content">
                 <div class="shead">
                     <h2><i class="fas fa-edit"></i> Content Manager</h2>
@@ -879,14 +882,14 @@
                 <div style="background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 15px;">
                     <h3 style="color: var(--gold); font-size: 15px; margin-bottom: 15px; font-family: 'Playfair Display', serif;"><i class="fas fa-image"></i> Logo & Branding</h3>
                     <div class="fgroup">
-                        <label>🖼️ Main Logo URL</label>
-                        <input type="text" id="c-logo-url" placeholder="https://i.ibb.co/xxxxx/logo.png">
-                        <div class="img-upload-wrap">
-                            <input type="file" id="c-logo-file" accept="image/*" style="display:none" onchange="handleImageUpload(event, 'c-logo-url', null, 'c-logo-status')">
-                            <button type="button" class="upload-btn" onclick="document.getElementById('c-logo-file').click()">
-                                <i class="fas fa-cloud-upload-alt"></i> Upload Logo
-                            </button>
-                            <span id="c-logo-status" class="upload-status"></span>
+                        <label>🖼️ Main Logo</label>
+                        <input type="hidden" id="c-logo-url">
+                        <div class="img-preview-box preview-main" id="c-logo-preview" style="margin:0 auto 10px;">
+                            <div class="img-placeholder"><i class="fas fa-image"></i><span>No logo</span></div>
+                        </div>
+                        <div class="img-upload-wrap" style="justify-content:center;">
+                            <input type="file" id="c-logo-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'c-logo-url', 'c-logo-preview', null)">
+                            <button type="button" class="upload-btn" onclick="document.getElementById('c-logo-file').click()"><i class="fas fa-cloud-upload-alt"></i> Upload Logo</button>
                         </div>
                     </div>
                     <div class="fgroup">
@@ -962,7 +965,6 @@
                 </div>
             </div>
 
-            <!-- SETTINGS -->
             <div class="section" id="sec-settings">
                 <div class="shead">
                     <h2><i class="fas fa-cog"></i> Store Settings</h2>
@@ -1027,9 +1029,12 @@
                         <button type="button" class="btn-s" onclick="restoreAllData()" style="justify-content: center; padding: 12px;"><i class="fas fa-upload"></i> Restore Data</button>
                     </div>
                     <input type="file" id="restore-file-input" accept=".json" style="display: none;" onchange="handleRestoreFile(event)">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                         <button type="button" class="btn-p" onclick="forceSyncWebsite()" style="justify-content: center; padding: 12px;"><i class="fas fa-bolt"></i> Force Sync</button>
                         <button type="button" class="btn-s" onclick="clearAdminCacheNow()" style="justify-content: center; padding: 12px;"><i class="fas fa-broom"></i> Clear Cache</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                        <button type="button" class="btn-p" onclick="recalcAllReviewStats()" style="justify-content: center; padding: 12px; background: linear-gradient(135deg, #3b82f6, #1d4ed8);"><i class="fas fa-calculator"></i> Recalculate Review Stats (One-time)</button>
                     </div>
                 </div>
 
@@ -1041,7 +1046,6 @@
         </div>
     </div>
 
-    <!-- COUPON MODAL -->
     <div class="coupon-form-modal" id="coupon-modal">
         <div class="coupon-form-box">
             <h3 id="coupon-modal-title"><i class="fas fa-ticket-alt"></i> Add New Coupon</h3>
@@ -1090,24 +1094,29 @@
         </div>
     </div>
 
-    <!-- BANNER MODAL -->
     <div class="coupon-form-modal" id="banner-modal">
         <div class="coupon-form-box">
             <h3 id="banner-modal-title"><i class="fas fa-image"></i> Add New Banner</h3>
             <div id="banner-form-msg" class="msg"></div>
             <input type="hidden" id="b-edit-id">
+            
+            <!-- Banner Image Preview Box Style -->
             <div class="fgroup">
-                <label>🖼️ Banner Image URL *</label>
-                <input type="text" id="b-image" placeholder="https://i.ibb.co/xxxxx/banner.png" required>
-                <div class="img-upload-wrap">
-                    <input type="file" id="b-image-file" accept="image/*" style="display:none" onchange="handleImageUpload(event, 'b-image', 'b-preview', 'b-image-status')">
+                <label>🖼️ Banner Image *</label>
+                <input type="hidden" id="b-image">
+                <div class="img-preview-box preview-banner" id="b-preview" style="margin:0 auto 10px;">
+                    <div class="img-placeholder"><i class="fas fa-image"></i><span>No banner</span></div>
+                </div>
+                <div class="img-upload-wrap" style="justify-content:center;">
+                    <input type="file" id="b-image-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'b-image', 'b-preview', 'b-image-status')">
                     <button type="button" class="upload-btn" onclick="document.getElementById('b-image-file').click()">
-                        <i class="fas fa-cloud-upload-alt"></i> Upload From Gallery
+                        <i class="fas fa-cloud-upload-alt"></i> Upload Banner
                     </button>
                     <span id="b-image-status" class="upload-status"></span>
                 </div>
                 <small style="color: var(--muted); font-size: 11px; display: block; margin-top: 5px;">💡 Recommended: 1600×900 px</small>
             </div>
+
             <div class="fgroup">
                 <label>🔗 Banner Title (ঐচ্ছিক)</label>
                 <input type="text" id="b-title" placeholder="যেমন: ঈদ স্পেশাল কালেকশন">
@@ -1156,12 +1165,7 @@
                     <span class="toggle-slider"></span>
                 </label>
             </div>
-            <div style="margin-top: 15px; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;">
-                <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px;">🖼️ Preview:</div>
-                <div id="b-preview" style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                    <span style="color: var(--muted); font-size: 12px;">ছবি দেখতে URL দিন</span>
-                </div>
-            </div>
+            
             <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
                 <button type="button" class="btn-p" id="b-submit-btn" onclick="submitBanner()" style="flex: 1; min-width: 150px; justify-content: center; padding: 14px;"><i class="fas fa-save"></i> Save Banner</button>
                 <button type="button" class="btn-s" onclick="closeBannerModal()" style="flex: 1; min-width: 150px; justify-content: center; padding: 14px;"><i class="fas fa-times"></i> Cancel</button>
@@ -1170,7 +1174,7 @@
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc, setDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -1186,9 +1190,6 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // ============================================================
-        // GLOBALS
-        // ============================================================
         let products = [], orders = [], reviews = [], newsletterList = [], coupons = [], banners = [];
         let editingId = null, editingCouponId = null, editingBannerId = null;
         let selectedSizes = [];
@@ -1230,9 +1231,6 @@
         const PAGE_NAMES = { 'about': 'About Us', 'privacy': 'Privacy Policy', 'terms': 'Terms & Conditions', 'return-policy': 'Return Policy', 'contact': 'Contact Us', 'track-order': 'Track Order' };
         const DEFAULT_CONTENT = { logoUrl: 'https://i.ibb.co/Z650JJc0/Messenger-creation-4-FE81-C6-B-2823-43-B6-A137-5-BF82-ABFC88-B.jpg', copyrightText: '© 2026 Top Hijab Collection. All rights reserved.' };
 
-        // ============================================================
-        // UTILITIES
-        // ============================================================
         window.extractUrl = function(str) {
             if (!str || typeof str !== 'string') return '';
             const t = str.trim();
@@ -1258,9 +1256,6 @@
             setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300); }, 2000);
         };
 
-        // ============================================================
-        // AUTH
-        // ============================================================
         window.doLogin = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
@@ -1310,9 +1305,6 @@
             }
         });
 
-        // ============================================================
-        // INSTANT CACHE LOAD
-        // ============================================================
         function instantLoadFromCache() {
             const cP = fastGet(FAST_CACHE.products);
             const cO = fastGet(FAST_CACHE.orders);
@@ -1329,9 +1321,6 @@
             recalcStatsFromCache();
         }
 
-        // ============================================================
-        // BACKGROUND SYNC
-        // ============================================================
         async function preloadEverything() {
             try {
                 const results = await Promise.all([
@@ -1363,11 +1352,7 @@
             } catch(e) { console.warn('Preload error:', e); }
         }
 
-        // ============================================================
-        // REALTIME LISTENERS
-        // ============================================================
         function attachRealtimeListeners() {
-            // Newsletter
             try {
                 onSnapshot(collection(db, 'newsletter'), (snap) => {
                     const arr = [];
@@ -1393,7 +1378,6 @@
                 }, (err) => console.warn('Newsletter listener:', err.message));
             } catch(e) {}
 
-            // Reviews
             try {
                 onSnapshot(collection(db, 'reviews'), (snap) => {
                     const arr = [];
@@ -1418,7 +1402,6 @@
                 }, (err) => console.warn('Reviews listener:', err.message));
             } catch(e) {}
 
-            // Orders
             try {
                 onSnapshot(collection(db, 'orders'), (snap) => {
                     const arr = [];
@@ -1444,9 +1427,6 @@
             } catch(e) {}
         }
 
-        // ============================================================
-        // TAB SWITCH
-        // ============================================================
         window.switchTab = function(name) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -1515,9 +1495,6 @@
             }
         };
 
-        // ============================================================
-        // DASHBOARD STATS
-        // ============================================================
         window.loadStats = async () => {
             const cachedP = fastGet(FAST_CACHE.products);
             const cachedO = fastGet(FAST_CACHE.orders);
@@ -1612,9 +1589,6 @@
             c.innerHTML = html;
         }
 
-        // ============================================================
-        // IMAGE UPLOAD HANDLERS (using universal handleImageUpload)
-        // ============================================================
         window.uploadAdditionalMultiple = async function(e) {
             const files = Array.from(e.target.files);
             if (!files.length) return;
@@ -1626,32 +1600,56 @@
             e.target.value = '';
         };
 
-        window.uploadColorRow = async function(event, rowId) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const row = document.getElementById(rowId);
-            if (!row) return;
-            const input = row.querySelector('.cimg');
-            try {
-                const url = await window.uploadToImgBB(file);
-                input.value = url;
-                window.showToast('✅ Color uploaded!');
-            } catch(err) { alert('❌ ' + err.message); }
-            event.target.value = '';
-        };
-
         window.uploadAdditionalRow = async function(event, rowId) {
             const file = event.target.files[0];
             if (!file) return;
             const row = document.getElementById(rowId);
             if (!row) return;
             const input = row.querySelector('.aimg');
+            const preview = row.querySelector('.aimg-prev');
             try {
                 const url = await window.uploadToImgBB(file);
                 input.value = url;
+                preview.innerHTML = `<img src="${url}"><button type="button" class="img-remove-btn" onclick="clearImgRow('${rowId}')"><i class="fas fa-times"></i></button>`;
+                preview.classList.add('has-image');
                 window.showToast('✅ Uploaded!');
             } catch(err) { alert('❌ ' + err.message); }
             event.target.value = '';
+        };
+
+        window.clearImgRow = function(rowId) {
+            const row = document.getElementById(rowId);
+            if (!row) return;
+            row.querySelector('.aimg').value = '';
+            const preview = row.querySelector('.aimg-prev');
+            preview.innerHTML = '<div class="img-placeholder"><i class="fas fa-image"></i></div>';
+            preview.classList.remove('has-image');
+        };
+
+        window.uploadColorRow = async function(event, rowId) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const row = document.getElementById(rowId);
+            if (!row) return;
+            const input = row.querySelector('.cimg');
+            const preview = row.querySelector('.cimg-prev');
+            try {
+                const url = await window.uploadToImgBB(file);
+                input.value = url;
+                preview.innerHTML = `<img src="${url}"><button type="button" class="img-remove-btn" onclick="clearColorRow('${rowId}')"><i class="fas fa-times"></i></button>`;
+                preview.classList.add('has-image');
+                window.showToast('✅ Color uploaded!');
+            } catch(err) { alert('❌ ' + err.message); }
+            event.target.value = '';
+        };
+
+        window.clearColorRow = function(rowId) {
+            const row = document.getElementById(rowId);
+            if (!row) return;
+            row.querySelector('.cimg').value = '';
+            const preview = row.querySelector('.cimg-prev');
+            preview.innerHTML = '<div class="img-placeholder"><i class="fas fa-image"></i></div>';
+            preview.classList.remove('has-image');
         };
 
         window.uploadContactIcon = async function(event, inputEl) {
@@ -1708,9 +1706,6 @@
             event.target.value = '';
         };
 
-        // ============================================================
-        // PRODUCT ADDITIONAL IMAGES / COLORS
-        // ============================================================
         window.addAdditionalImage = (url) => {
             const c = document.getElementById('additional-images');
             if (!c) return;
@@ -1718,7 +1713,18 @@
             const row = document.createElement('div');
             row.className = 'crow-img';
             row.id = id;
-            row.innerHTML = `<input type="text" placeholder="Image URL" value="${url || ''}" class="aimg"><input type="file" accept="image/*" style="display:none" onchange="uploadAdditionalRow(event, '${id}')"><button type="button" class="mini-upl" onclick="this.previousElementSibling.click()"><i class="fas fa-cloud-upload-alt"></i></button><button type="button" class="rm" onclick="document.getElementById('${id}').remove()"><i class="fas fa-times"></i></button>`;
+            row.innerHTML = `
+                <div class="img-preview-box preview-add" id="${id}-prev">
+                    ${url ? `<img src="${url}"><button type="button" class="img-remove-btn" onclick="clearImgRow('${id}')"><i class="fas fa-times"></i></button>` : '<div class="img-placeholder"><i class="fas fa-image"></i></div>'}
+                </div>
+                <div class="img-info">
+                    <input type="hidden" id="${id}-url" class="aimg" value="${url || ''}">
+                    <input type="file" id="${id}-file" accept="image/*" style="display:none" onchange="uploadAdditionalRow(event, '${id}')">
+                    <button type="button" class="upload-btn" onclick="document.getElementById('${id}-file').click()"><i class="fas fa-cloud-upload-alt"></i> ${url ? 'Change' : 'Upload'}</button>
+                </div>
+                <button type="button" class="rm" onclick="document.getElementById('${id}').remove()"><i class="fas fa-times"></i></button>
+            `;
+            if (url) row.querySelector('.img-preview-box').classList.add('has-image');
             c.appendChild(row);
         };
 
@@ -1727,9 +1733,21 @@
             if (!c) return;
             const id = 'c-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
             const row = document.createElement('div');
-            row.className = 'crow';
+            row.className = 'crow-color';
             row.id = id;
-            row.innerHTML = `<input type="text" placeholder="Color Name" value="${name || ''}" class="cname"><input type="text" placeholder="Image URL" value="${img || ''}" class="cimg"><input type="file" accept="image/*" style="display:none" onchange="uploadColorRow(event, '${id}')"><button type="button" class="mini-upl" onclick="this.previousElementSibling.click()"><i class="fas fa-cloud-upload-alt"></i></button><button type="button" class="rm" onclick="document.getElementById('${id}').remove()"><i class="fas fa-times"></i></button>`;
+            row.innerHTML = `
+                <div class="img-preview-box preview-color" id="${id}-prev">
+                    ${img ? `<img src="${img}"><button type="button" class="img-remove-btn" onclick="clearColorRow('${id}')"><i class="fas fa-times"></i></button>` : '<div class="img-placeholder"><i class="fas fa-image"></i></div>'}
+                </div>
+                <div class="color-info">
+                    <input type="text" class="cname" placeholder="Color Name (যেমন: Maroon)" value="${name || ''}">
+                    <input type="hidden" id="${id}-url" class="cimg" value="${img || ''}">
+                    <input type="file" id="${id}-file" accept="image/*" style="display:none" onchange="uploadColorRow(event, '${id}')">
+                    <button type="button" class="upload-btn" onclick="document.getElementById('${id}-file').click()"><i class="fas fa-cloud-upload-alt"></i> ${img ? 'Change Image' : 'Upload Image'}</button>
+                </div>
+                <button type="button" class="rm" onclick="document.getElementById('${id}').remove()"><i class="fas fa-times"></i></button>
+            `;
+            if (img) row.querySelector('.img-preview-box').classList.add('has-image');
             c.appendChild(row);
         };
 
@@ -1782,6 +1800,9 @@
             selectedSizes = [];
             document.getElementById('p-form').reset();
             document.getElementById('edit-id').value = '';
+            document.getElementById('p-image').value = '';
+            document.getElementById('p-image-preview').innerHTML = '<div class="img-placeholder"><i class="fas fa-image"></i><span>No image</span></div>';
+            document.getElementById('p-image-preview').classList.remove('has-image');
             document.getElementById('colors').innerHTML = '';
             document.getElementById('additional-images').innerHTML = '';
             document.getElementById('p-video').value = '';
@@ -1795,9 +1816,6 @@
             addAdditionalImage();
         };
 
-        // ============================================================
-        // PRODUCTS
-        // ============================================================
         window.loadProducts = async (forceRefresh = false) => {
             const c = document.getElementById('products-container');
             if (!forceRefresh) {
@@ -1845,10 +1863,8 @@
 
         window.deleteProduct = async (docId, name) => {
             if (!confirm('মুছে ফেলতে চান: "' + name + '"?')) return;
-            // Instant UI removal
             const card = document.querySelector(`.pcard button[onclick*="${docId}"]`)?.closest('.pcard');
             window.instantDelete(card, () => deleteDoc(doc(db, 'products', docId)), 'Product deleted');
-            // Update local array
             products = products.filter(p => p.docId !== docId);
             fastSet(FAST_CACHE.products, products);
             recalcStatsFromCache();
@@ -1878,6 +1894,20 @@
             document.getElementById('p-video').value = p.video || '';
             document.getElementById('p-badge').value = p.badge || '';
             document.getElementById('p-desc').value = p.fullDescription || '';
+            
+            // Main Image Preview
+            const mainImg = extractUrl(p.image);
+            const prev = document.getElementById('p-image-preview');
+            if (prev) {
+                if (mainImg) {
+                    prev.innerHTML = `<img src="${mainImg}"><button type="button" class="img-remove-btn" onclick="clearImageUpload('p-image', 'p-image-preview')"><i class="fas fa-times"></i></button>`;
+                    prev.classList.add('has-image');
+                } else {
+                    prev.innerHTML = '<div class="img-placeholder"><i class="fas fa-image"></i><span>No image</span></div>';
+                    prev.classList.remove('has-image');
+                }
+            }
+
             selectedSizes = Array.isArray(p.sizes) ? p.sizes.slice() : [];
             onCategoryChange();
             if (Array.isArray(p.colors) && p.colors.length > 0) p.colors.forEach(col => addColor(col.name || '', col.image || ''));
@@ -1919,7 +1949,7 @@
                     if (sizes.length === 0) { showMsg('form-msg', '⚠️ অন্তত একটি Size সিলেক্ট করুন।', 'bad'); btn.disabled = false; btn.innerHTML = orig; return; }
                 }
                 const colors = [];
-                document.querySelectorAll('#colors .crow').forEach(row => { const n = row.querySelector('.cname').value.trim(); const i = row.querySelector('.cimg').value.trim(); if (n && i) colors.push({ name: n, image: extractUrl(i) || i }); });
+                document.querySelectorAll('#colors .crow-color').forEach(row => { const n = row.querySelector('.cname').value.trim(); const i = row.querySelector('.cimg').value.trim(); if (n && i) colors.push({ name: n, image: extractUrl(i) || i }); });
                 if (colors.length === 0) { showMsg('form-msg', '⚠️ অন্তত একটি Color যোগ করুন।', 'bad'); btn.disabled = false; btn.innerHTML = orig; return; }
                 const additionalImages = [];
                 document.querySelectorAll('#additional-images .crow-img').forEach(row => { const urlInput = row.querySelector('.aimg'); if (urlInput) { const cleanUrl = extractUrl(urlInput.value.trim()) || urlInput.value.trim(); if (cleanUrl && cleanUrl.length > 5) additionalImages.push(cleanUrl); } });
@@ -1952,9 +1982,6 @@
             }
         };
 
-        // ============================================================
-        // ORDERS
-        // ============================================================
         window.loadOrders = async (forceRefresh = false) => {
             const c = document.getElementById('orders-container');
             if (!forceRefresh) {
@@ -2103,9 +2130,6 @@
             w.document.close();
         };
 
-        // ============================================================
-        // REVIEWS
-        // ============================================================
         window.loadReviews = async () => {
             const c = document.getElementById('reviews-container');
             const cached = fastGet(FAST_CACHE.reviews);
@@ -2149,16 +2173,29 @@
 
         window.deleteReview = async (docId) => {
             if (!confirm('রিভিউ মুছে ফেলতে চান?')) return;
+            const review = reviews.find(r => r.docId === docId);
             const card = document.querySelector(`[data-review-id="${docId}"]`);
             window.instantDelete(card, () => deleteDoc(doc(db, 'reviews', docId)), 'Review deleted');
             reviews = reviews.filter(r => r.docId !== docId);
             fastSet(FAST_CACHE.reviews, reviews);
+            
+            // Update product stats
+            if (review && review.productId) {
+                const prod = products.find(p => String(p.id) === String(review.productId));
+                if (prod && prod.docId) {
+                    const rating = parseInt(review.rating) || 0;
+                    try {
+                        await updateDoc(doc(db, 'products', prod.docId), {
+                            reviewCount: increment(-1),
+                            ratingSum: increment(-rating),
+                            [`ratingDist.${rating}`]: increment(-1)
+                        });
+                    } catch (e) { console.warn('Product stats decrement failed:', e.message); }
+                }
+            }
             showToast('✅ মুছে ফেলা হয়েছে');
         };
 
-        // ============================================================
-        // NEWSLETTER
-        // ============================================================
         window.loadNewsletter = async () => {
             const c = document.getElementById('newsletter-container');
             const cached = fastGet(FAST_CACHE.newsletter);
@@ -2222,9 +2259,6 @@
             showToast('✅ মুছে ফেলা হয়েছে');
         };
 
-        // ============================================================
-        // COUPONS
-        // ============================================================
         window.loadCoupons = async () => {
             const c = document.getElementById('coupons-container');
             const cached = fastGet(FAST_CACHE.coupons);
@@ -2379,9 +2413,6 @@
             showToast('✅ মুছে ফেলা হয়েছে');
         };
 
-        // ============================================================
-        // BANNERS
-        // ============================================================
         window.loadBanners = async () => {
             const c = document.getElementById('banners-container');
             if (!c) return;
@@ -2427,13 +2458,14 @@
             document.getElementById('banner-modal-title').innerHTML = '<i class="fas fa-image"></i> Add New Banner';
             document.getElementById('b-edit-id').value = '';
             document.getElementById('b-image').value = '';
+            document.getElementById('b-preview').innerHTML = '<div class="img-placeholder"><i class="fas fa-image"></i><span>No banner</span></div>';
+            document.getElementById('b-preview').classList.remove('has-image');
             document.getElementById('b-title').value = '';
             document.getElementById('b-link-type').value = 'none';
             document.getElementById('b-order').value = (banners.length + 1);
             document.getElementById('b-active').checked = true;
             document.getElementById('b-submit-btn').innerHTML = '<i class="fas fa-save"></i> Save Banner';
             document.getElementById('banner-form-msg').classList.remove('show');
-            document.getElementById('b-preview').innerHTML = '<span style="color: var(--muted); font-size: 12px;">ছবি দেখতে URL দিন</span>';
             onBannerLinkTypeChange();
             document.getElementById('banner-modal').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2458,8 +2490,16 @@
             document.getElementById('b-active').checked = b.active !== false;
             document.getElementById('b-submit-btn').innerHTML = '<i class="fas fa-save"></i> Update Banner';
             document.getElementById('banner-form-msg').classList.remove('show');
+            
             const imgUrl = extractUrl(b.image) || b.image || '';
-            if (imgUrl && imgUrl.startsWith('http')) document.getElementById('b-preview').innerHTML = `<img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
+            const prev = document.getElementById('b-preview');
+            if (imgUrl && imgUrl.startsWith('http')) {
+                prev.innerHTML = `<img src="${imgUrl}"><button type="button" class="img-remove-btn" onclick="clearImageUpload('b-image', 'b-preview')"><i class="fas fa-times"></i></button>`;
+                prev.classList.add('has-image');
+            } else {
+                prev.innerHTML = '<div class="img-placeholder"><i class="fas fa-image"></i><span>No banner</span></div>';
+                prev.classList.remove('has-image');
+            }
             onBannerLinkTypeChange();
             document.getElementById('banner-modal').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2522,9 +2562,6 @@
             showToast('✅ মুছে ফেলা হয়েছে');
         };
 
-        // ============================================================
-        // PAGES
-        // ============================================================
         window.loadPages = async function() {
             const cached = fastGet(FAST_CACHE.pages);
             if (cached && Object.keys(cached).length > 0) pagesCache = cached;
@@ -2578,9 +2615,6 @@
             w.document.close();
         };
 
-        // ============================================================
-        // CONTENT MANAGER
-        // ============================================================
         window.loadContentSettings = async function() {
             const cached = fastGet(FAST_CACHE.contentSettings);
             if (cached) {
@@ -2868,7 +2902,6 @@
                     if (name && image) hcList.push({ name, image, order, enabled });
                 });
 
-                // Save all in parallel
                 const [_, faqOld, hcOld] = await Promise.all([
                     setDoc(doc(db, 'settings', 'store'), contentData, { merge: true }),
                     getDocs(collection(db, 'faq')),
@@ -2887,7 +2920,6 @@
                     setDoc(doc(db, 'sizeCharts', currentCat), { title: chartTitle, rows: sizeRows, updatedAt: new Date().toISOString() }, { merge: true })
                 ]);
 
-                // MERGE (not overwrite) contentSettings cache
                 const existingContent = fastGet(FAST_CACHE.contentSettings) || {};
                 fastSet(FAST_CACHE.contentSettings, { ...existingContent, ...contentData });
                 fastSet(FAST_CACHE.faq, faqList);
@@ -2914,9 +2946,6 @@
             showMsg('content-msg', 'ℹ️ Reset। Save করলে যাবে।', 'ok');
         };
 
-        // ============================================================
-        // SETTINGS
-        // ============================================================
         window.loadSettings = async function() {
             const cached = fastGet(FAST_CACHE.settings);
             if (cached) { settingsCache = { ...DEFAULT_SETTINGS, ...cached }; fillSettingsForm(); }
@@ -3004,9 +3033,6 @@
             showMsg('settings-msg', 'ℹ️ Default loaded।', 'ok');
         };
 
-        // ============================================================
-        // BACKUP / SYNC
-        // ============================================================
         window.backupAllData = async function() {
             if (!confirm('সব Data Backup নিতে চান?')) return;
             try {
@@ -3073,6 +3099,54 @@
             setTimeout(() => location.reload(), 1000);
         };
 
+        window.recalcAllReviewStats = async function() {
+            if (!confirm('সব প্রোডাক্টের রিভিউ স্ট্যাটস নতুন করে হিসাব করবেন?\n\n১-২ মিনিট লাগতে পারে। চলবে?')) return;
+            try {
+                const btn = event.target.closest('button');
+                const origText = btn ? btn.innerHTML : '';
+                if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; }
+                
+                const reviewsSnap = await getDocs(collection(db, 'reviews'));
+                const grouped = {};
+                reviewsSnap.forEach(d => {
+                    const data = d.data();
+                    const pid = data.productId;
+                    if (pid === undefined || pid === null) return;
+                    const key = String(pid);
+                    if (!grouped[key]) grouped[key] = { count: 0, sum: 0, dist: {1:0,2:0,3:0,4:0,5:0} };
+                    const r = parseInt(data.rating) || 0;
+                    grouped[key].count++;
+                    grouped[key].sum += r;
+                    if (grouped[key].dist[r] !== undefined) grouped[key].dist[r]++;
+                });
+                
+                const productsSnap = await getDocs(collection(db, 'products'));
+                let updated = 0, failed = 0;
+                for (const docSnap of productsSnap.docs) {
+                    const data = docSnap.data();
+                    const pid = String(parseInt(data.id) || 0);
+                    const stats = grouped[pid] || { count: 0, sum: 0, dist: {1:0,2:0,3:0,4:0,5:0} };
+                    try {
+                        await updateDoc(doc(db, 'products', docSnap.id), {
+                            reviewCount: stats.count,
+                            ratingSum: stats.sum,
+                            ratingDist: stats.dist
+                        });
+                        updated++;
+                    } catch (e) {
+                        failed++;
+                    }
+                }
+                
+                alert(`✅ সফল!\n\n${updated}টি প্রোডাক্ট আপডেট হয়েছে${failed > 0 ? `\n${failed}টি ব্যর্থ` : ''}`);
+                if (btn) { btn.disabled = false; btn.innerHTML = origText; }
+            } catch (err) {
+                alert('❌ ' + (err.message || 'Failed'));
+                const btn = event.target.closest('button');
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-calculator"></i> Recalculate Review Stats (One-time)'; }
+            }
+        };
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const cm = document.getElementById('coupon-modal');
@@ -3082,10 +3156,9 @@
             }
         });
 
-        console.log('✅ Admin Panel Ready — Ultra Super Fast Version with ImgBB + Notifications + Realtime');
+        console.log('✅ Admin Panel Ready — Top Hijab');
     </script>
 
-    <!-- PWA SERVICE WORKER -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
